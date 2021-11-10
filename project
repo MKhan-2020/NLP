@@ -1,0 +1,419 @@
+@SpringBootApplication
+public class StudentManagementSystemApplication implements CommandLineRunner{
+
+	public static void main(String[] args) {
+		SpringApplication.run(StudentManagementSystemApplication.class, args);
+	}
+
+	@Autowired
+	private StudentRepository studentRepository;
+	
+	@Override
+	public void run(String... args) throws Exception {
+		
+
+		
+	}
+
+}
+@Controller
+public class ProductController {
+	
+	private ProductService ProductService;
+
+	public ProductController(ProductService ProductService) {
+		super();
+		this.ProductService = ProductService;
+	}
+	
+	// handler method to handle list Products and return mode and view
+	@GetMapping("/products")
+	public String listProducts(Model model) {
+		model.addAttribute("products", ProductService.getAllProducts());
+		return "products";
+	}
+	
+	@GetMapping("/products/new")
+	public String createProductForm(Model model) {
+		
+		// create Product object to hold Product form data
+		Product product = new Product();
+		model.addAttribute("product", product);
+		return "create_product";
+		
+	}
+	
+	@PostMapping("/products")
+	public String saveProduct(@ModelAttribute("product") Product product) {
+		ProductService.saveProduct(product);
+		return "redirect:/products";
+	}
+	
+	@GetMapping("/products/edit/{id}")
+	public String editProductForm(@PathVariable Long id, Model model) {
+		model.addAttribute("product", ProductService.getProductById(id));
+		return "edit_product";
+	}
+
+	@PostMapping("/products/{id}")
+	public String updateProduct(@PathVariable Long id,
+			@ModelAttribute("product") Product product,
+			Model model) {
+		
+		// get Product from database by id
+		Product existingProduct = ProductService.getProductById(id);
+		existingProduct.setId(id);
+		existingProduct.setprodName(product.getprodName());
+		existingProduct.setprice(product.getprice());
+		
+		// save updated Product object
+		ProductService.updateProduct(existingProduct);
+		return "redirect:/products";		
+	}
+	
+	// handler method to handle delete Product request
+	
+	@GetMapping("/products/{id}")
+	public String deleteProduct(@PathVariable Long id) {
+		ProductService.deleteProductById(id);
+		return "redirect:/products";
+	}
+	
+}
+package net.javaguides.sms.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import net.javaguides.sms.entity.Student;
+import net.javaguides.sms.service.StudentService;
+
+@Controller
+public class StudentController {
+	
+	private StudentService studentService;
+
+	public StudentController(StudentService studentService) {
+		super();
+		this.studentService = studentService;
+	}
+	
+	// handler method to handle list students and return mode and view
+	@GetMapping("/users")
+	public String listStudents(Model model) {
+		model.addAttribute("students", studentService.getAllStudents());
+		return "students";
+	}
+	
+	@GetMapping("/users/new")
+	public String createStudentForm(Model model) {
+		
+		// create student object to hold student form data
+		Student student = new Student();
+		model.addAttribute("student", student);
+		return "create_student";
+		
+	}
+	
+	@PostMapping("/users")
+	public String saveStudent(@ModelAttribute("student") Student student) {
+		studentService.saveStudent(student);
+		return "redirect:/users";
+	}
+	
+	@GetMapping("/users/edit/{id}")
+	public String editStudentForm(@PathVariable Long id, Model model) {
+		model.addAttribute("student", studentService.getStudentById(id));
+		return "edit_student";
+	}
+
+	@PostMapping("/users/{id}")
+	public String updateStudent(@PathVariable Long id,
+			@ModelAttribute("student") Student student,
+			Model model) {
+		
+		// get student from database by id
+		Student existingStudent = studentService.getStudentById(id);
+		existingStudent.setId(id);
+		existingStudent.setFirstName(student.getFirstName());
+		existingStudent.setLastName(student.getLastName());
+		existingStudent.setEmail(student.getEmail());
+		
+		// save updated student object
+		studentService.updateStudent(existingStudent);
+		return "redirect:/users";		
+	}
+	
+	// handler method to handle delete student request
+	
+	@GetMapping("/users/{id}")
+	public String deleteStudent(@PathVariable Long id) {
+		studentService.deleteStudentById(id);
+		return "redirect:/users";
+	}
+	
+}
+package net.javaguides.sms.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "products")
+public class Product {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	public Long id;
+	
+	@Column(name = "prod_name", nullable = false)
+	public String prodName;
+	
+	@Column(name = "price")
+	public String price;
+
+	
+	public Product() {
+		
+	}
+	
+	public Product(String prodName, String price) {
+		super();
+		this.prodName = prodName;
+		this.price = price;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public String getprodName() {
+		return prodName;
+	}
+	public void setprodName(String prodName) {
+		this.prodName = prodName;
+	}
+	public String getprice() {
+		return price;
+	}
+	public void setprice(String price) {
+		this.price = price;
+	}
+
+}
+
+package net.javaguides.sms.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "students")
+public class Student {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	
+	@Column(name = "first_name", nullable = false)
+	private String firstName;
+	
+	@Column(name = "last_name")
+	private String lastName;
+	
+	@Column(name = "email")
+	private String email;
+	
+	public Student() {
+		
+	}
+	
+	public Student(String firstName, String lastName, String email) {
+		super();
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public String getFirstName() {
+		return firstName;
+	}
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+	public String getLastName() {
+		return lastName;
+	}
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+}
+package net.javaguides.sms.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import net.javaguides.sms.entity.Product;
+
+public interface ProductRepository extends JpaRepository<Product, Long>{
+
+}
+package net.javaguides.sms.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import net.javaguides.sms.entity.Student;
+
+public interface StudentRepository extends JpaRepository<Student, Long>{
+
+}
+
+package net.javaguides.sms.service;
+
+import java.util.List;
+
+import net.javaguides.sms.entity.Product;
+
+public interface ProductService {
+	List<Product> getAllProducts();
+	
+	Product saveProduct(Product product);
+	
+	Product getProductById(Long id);
+	
+	Product updateProduct(Product product);
+	
+	void deleteProductById(Long id);
+}
+package net.javaguides.sms.service;
+
+import java.util.List;
+
+import net.javaguides.sms.entity.Student;
+
+public interface StudentService {
+	List<Student> getAllStudents();
+	
+	Student saveStudent(Student student);
+	
+	Student getStudentById(Long id);
+	
+	Student updateStudent(Student student);
+	
+	void deleteStudentById(Long id);
+}
+package net.javaguides.sms.service.impl;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import net.javaguides.sms.entity.Product;
+import net.javaguides.sms.repository.ProductRepository;
+import net.javaguides.sms.service.ProductService;
+
+@Service
+public class ProductServiceImpl implements ProductService{
+
+	private ProductRepository ProductRepository;
+	
+	public ProductServiceImpl(ProductRepository ProductRepository) {
+		super();
+		this.ProductRepository = ProductRepository;
+	}
+
+	@Override
+	public List<Product> getAllProducts() {
+		return ProductRepository.findAll();
+	}
+
+	@Override
+	public Product saveProduct(Product Product) {
+		return ProductRepository.save(Product);
+	}
+
+	@Override
+	public Product getProductById(Long id) {
+		return ProductRepository.findById(id).get();
+	}
+
+	@Override
+	public Product updateProduct(Product Product) {
+		return ProductRepository.save(Product);
+	}
+
+	@Override
+	public void deleteProductById(Long id) {
+		ProductRepository.deleteById(id);	
+	}
+
+}
+package net.javaguides.sms.service.impl;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import net.javaguides.sms.entity.Student;
+import net.javaguides.sms.repository.StudentRepository;
+import net.javaguides.sms.service.StudentService;
+
+@Service
+public class StudentServiceImpl implements StudentService{
+
+	private StudentRepository studentRepository;
+	
+	public StudentServiceImpl(StudentRepository studentRepository) {
+		super();
+		this.studentRepository = studentRepository;
+	}
+
+	@Override
+	public List<Student> getAllStudents() {
+		return studentRepository.findAll();
+	}
+
+	@Override
+	public Student saveStudent(Student student) {
+		return studentRepository.save(student);
+	}
+
+	@Override
+	public Student getStudentById(Long id) {
+		return studentRepository.findById(id).get();
+	}
+
+	@Override
+	public Student updateStudent(Student student) {
+		return studentRepository.save(student);
+	}
+
+	@Override
+	public void deleteStudentById(Long id) {
+		studentRepository.deleteById(id);	
+	}
+
+}
